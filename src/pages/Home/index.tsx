@@ -52,8 +52,6 @@ const Home: React.FC = () => {
       .get(`${newPage}`)
       .then(response => response.data);
 
-    console.log('ola');
-
     const newCharacters = apiData.results.map((character: Character) => {
       const newCharacter = {
         name: character.name,
@@ -73,9 +71,17 @@ const Home: React.FC = () => {
       {characters?.map(character => (
         <NameCharacter key={character.name}>{character.name}</NameCharacter>
       ))}
-      <CharactersButton onPress={() => Pagination(nextPage)}>
-        <NameCharacter>Prox</NameCharacter>
-      </CharactersButton>
+      {nextPage && (
+        <CharactersButton onPress={() => Pagination(nextPage)}>
+          <NameCharacter>Next</NameCharacter>
+        </CharactersButton>
+      )}
+
+      {previousPage && (
+        <CharactersButton onPress={() => Pagination(previousPage)}>
+          <NameCharacter>Previous</NameCharacter>
+        </CharactersButton>
+      )}
     </Container>
   );
 };

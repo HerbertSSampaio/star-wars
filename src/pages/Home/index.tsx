@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
+import {useNavigation} from '@react-navigation/native';
 
 import {
   Container,
@@ -13,18 +14,6 @@ import {
   ListCharacter,
 } from './styles';
 import api from '../../services/api';
-import axios from 'axios';
-
-type CharacterDetais = {
-  name: string;
-  height: number;
-  mass: number;
-  hair_color: string;
-  skin_color: string;
-  eye_color: string;
-  birth_year: string;
-  gender: string;
-};
 
 type Character = {
   name: string;
@@ -32,13 +21,23 @@ type Character = {
 };
 
 const Home = () => {
+  const navigation = useNavigation();
   const [characters, setCharacters] = useState<Character[]>();
   const [nextPage, setNextPage] = useState(null);
   const [previousPage, setPreviousPage] = useState(null);
 
+  const handleSelectCharacter = useCallback(
+    (character_url: string) => {
+      navigation.navigate('CharacterDetails', {character_url});
+    },
+    [navigation],
+  );
+
   useEffect(() => {
     async function findCharacters(): Promise<void> {
-      const apiData = await api.get('/people').then(response => response.data);
+      const apiData = await api
+        .get('https://swapi.dev/api/people')
+        .then(response => response.data);
 
       const newCharacters = apiData.results.map((character: Character) => {
         const newCharacter = {
@@ -58,10 +57,7 @@ const Home = () => {
   }, []);
 
   async function loadMore(newPage: string | null): Promise<void> {
-    const apiData = await axios
-      .create()
-      .get(`${newPage}`)
-      .then(response => response.data);
+    const apiData = await api.get(`${newPage}`).then(response => response.data);
 
     const newCharacters = apiData.results.map((character: Character) => {
       const newCharacter = {
@@ -81,7 +77,9 @@ const Home = () => {
     <Container>
       <ListCharacter persistentScrollbar>
         {characters?.map(character => (
-          <CharactersButton key={character.name}>
+          <CharactersButton
+            key={character.name}
+            onPress={() => handleSelectCharacter(character.url)}>
             <NameCharacter>{character.name}</NameCharacter>
             <Icon name="chevron-right" size={18} color="#ffe81f" />
           </CharactersButton>

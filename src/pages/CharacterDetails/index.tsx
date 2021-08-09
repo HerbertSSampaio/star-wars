@@ -1,14 +1,17 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Container,
   Detail,
   AddFavoriteButton,
   TextButton,
-  RemoveFavoriteButton,
+  FavoritedButton,
 } from './styles';
 import {useRoute} from '@react-navigation/native';
 import api from '../../services/api';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {ICharacter} from '../../store/modules/favorite/types';
+import {addFavoriteCharacter} from '../../store/modules/favorite/actions';
+import {IState} from '../../store';
 
 interface RouteParams {
   character_url: string;
@@ -27,26 +30,41 @@ type CharacterDetails = {
   url: string;
 };
 
-function addCharacterAction(name: string | undefined, url: string | undefined) {
-  return {type: 'ADD_CHARACTER', character: {name, url}};
-}
-
 const CharacterDetails = () => {
   const route = useRoute();
   const routeParams = route.params as RouteParams;
   const [character, setCharacter] = useState<CharacterDetails>();
+  const favoriteCharacters = useSelector<IState, ICharacter[]>(
+    state => state.favorite.characters,
+  );
 
   const dispatch = useDispatch();
 
-  const handleFavorite = () => {
-    dispatch(addCharacterAction(character?.name, character?.url));
-  };
+  const handleAddFavorite = useCallback(
+    (name, url) => {
+      if (name === undefined || url === undefined) {
+        return;
+      }
+      const newCharacter = {
+        name: name,
+        url: url,
+      };
+      dispatch(addFavoriteCharacter(newCharacter));
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     async function findCharacter(): Promise<void> {
       const apiData = await api
         .get(`${routeParams.character_url}`)
         .then(response => response.data);
+
+      const characterInFavoriteIndex = favoriteCharacters.findIndex(
+        verifyCharacter => verifyCharacter.name === apiData.name,
+      );
+
+      const favorite = characterInFavoriteIndex === -1;
 
       const newCharacter = {
         name: apiData.name,
@@ -57,14 +75,14 @@ const CharacterDetails = () => {
         eye_color: apiData.eye_color,
         birth_year: apiData.birth_year,
         gender: apiData.gender,
-        favorite: false,
+        favorite: !favorite,
         url: apiData.url,
       };
 
       setCharacter(newCharacter);
     }
     findCharacter();
-  }, [routeParams.character_url]);
+  }, [favoriteCharacters, routeParams.character_url]);
 
   return (
     <Container>
@@ -77,11 +95,12 @@ const CharacterDetails = () => {
       <Detail>Gênero: {character?.gender}</Detail>
       <Detail>Aniversário: {character?.birth_year}</Detail>
       {character?.favorite ? (
-        <RemoveFavoriteButton onPress={() => handleFavorite}>
-          <TextButton>REMOVER DOS FAVORITOS</TextButton>
-        </RemoveFavoriteButton>
+        <FavoritedButton disabled>
+          <TextButton>PERSONAGEM FAVORITO</TextButton>
+        </FavoritedButton>
       ) : (
-        <AddFavoriteButton onPress={() => handleFavorite()}>
+        <AddFavoriteButton
+          onPress={() => handleAddFavorite(character?.name, character?.url)}>
           <TextButton>ADICIONAR AOS FAVORITOS</TextButton>
         </AddFavoriteButton>
       )}

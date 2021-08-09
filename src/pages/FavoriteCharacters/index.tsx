@@ -8,15 +8,14 @@ import {useSelector} from 'react-redux';
 import Icon from 'react-native-vector-icons/Feather';
 import React, {useCallback} from 'react';
 import {useNavigation} from '@react-navigation/native';
-
-type Character = {
-  name: string;
-  url: string;
-};
+import {IState} from '../../store';
+import {ICharacter} from '../../store/modules/favorite/types';
 
 const FavoriteCharacters = () => {
   const navigation = useNavigation();
-  const characters = useSelector(state => state.characters);
+  const characters = useSelector<IState, ICharacter[]>(
+    state => state.favorite.characters,
+  );
 
   const handleSelectCharacter = useCallback(
     (character_url: string) => {
@@ -30,7 +29,7 @@ const FavoriteCharacters = () => {
       <ListCharacter persistentScrollbar>
         {characters?.map(character => (
           <CharactersButton
-            key={character.name}
+            key={character.url}
             onPress={() => handleSelectCharacter(character.url)}>
             <NameCharacter>{character.name}</NameCharacter>
             <Icon name="chevron-right" size={18} color="#ffe81f" />

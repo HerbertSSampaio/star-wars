@@ -17,10 +17,10 @@ export const AddFavoriteButton = styled.TouchableOpacity`
   background-color: green;
 `;
 
-export const RemoveFavoriteButton = styled.TouchableOpacity`
+export const FavoritedButton = styled.TouchableOpacity`
   margin: auto 30px 30px 30px;
   padding: 10px 10px;
-  background-color: red;
+  background-color: gray;
 `;
 
 export const TextButton = styled.Text`

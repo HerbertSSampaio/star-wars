@@ -33,6 +33,10 @@ const Home = () => {
     [navigation],
   );
 
+  const handleListFavorites = useCallback(() => {
+    navigation.navigate('FavoriteCharacters');
+  }, [navigation]);
+
   useEffect(() => {
     async function findCharacters(): Promise<void> {
       const apiData = await api
@@ -117,7 +121,7 @@ const Home = () => {
       </Pagination>
 
       <FavoriteCharactersButton>
-        <FavoriteCharactersText>
+        <FavoriteCharactersText onPress={() => handleListFavorites()}>
           LISTAR PERSONAGENS FAVORITOS
         </FavoriteCharactersText>
       </FavoriteCharactersButton>

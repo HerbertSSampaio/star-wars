@@ -8,6 +8,7 @@ import {
 } from './styles';
 import {useRoute} from '@react-navigation/native';
 import api from '../../services/api';
+import {useDispatch} from 'react-redux';
 
 interface RouteParams {
   character_url: string;
@@ -26,12 +27,20 @@ type CharacterDetails = {
   url: string;
 };
 
+function addCharacterAction(name: string | undefined, url: string | undefined) {
+  return {type: 'ADD_CHARACTER', character: {name, url}};
+}
+
 const CharacterDetails = () => {
   const route = useRoute();
   const routeParams = route.params as RouteParams;
   const [character, setCharacter] = useState<CharacterDetails>();
 
-  const handleFavorite = () => {};
+  const dispatch = useDispatch();
+
+  const handleFavorite = () => {
+    dispatch(addCharacterAction(character?.name, character?.url));
+  };
 
   useEffect(() => {
     async function findCharacter(): Promise<void> {
@@ -72,7 +81,7 @@ const CharacterDetails = () => {
           <TextButton>REMOVER DOS FAVORITOS</TextButton>
         </RemoveFavoriteButton>
       ) : (
-        <AddFavoriteButton onPress={() => handleFavorite}>
+        <AddFavoriteButton onPress={() => handleFavorite()}>
           <TextButton>ADICIONAR AOS FAVORITOS</TextButton>
         </AddFavoriteButton>
       )}
